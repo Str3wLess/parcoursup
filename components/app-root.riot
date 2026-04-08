@@ -1,0 +1,44 @@
+﻿<app-root>
+  <header class="psu-header">
+    <a class="psu-brand" data-nav href={ state.homeHref }>Open Data Parcoursup</a>
+    <nav class="psu-nav">
+      <a data-nav href={ state.homeHref }>Recherche</a>
+      <a data-nav href={ state.compareHref }>Comparer ({ state.selCount })</a>
+    </nav>
+  </header>
+  <main class="psu-main">
+    <search-page if={ state.route.name === "home" } />
+    <formation-page if={ state.route.name === "formation" } formationId={ state.route.params.id } />
+    <compare-page if={ state.route.name === "compare" } />
+  </main>
+  <footer class="psu-footer">
+    <p>Données : jeu <code>fr-esr-parcoursup</code> — Ministère (open data). Usage pédagogique.</p>
+  </footer>
+  <script>
+    export default {
+      onBeforeMount(props, state) {
+        state.route = { name: "home", params: {} };
+        state.store = PSU.store;
+        state.homeHref = PSU.href("/");
+        state.compareHref = PSU.href("/compare");
+        state.selCount = 0;
+      },
+      onMounted(props, state) {
+        var self = this;
+        this._unsub = PSU.store.subscribe(function () {
+          self.update({
+            route: PSU.store.state.route,
+            selCount: PSU.store.state.selections.length,
+          });
+        });
+        this.update({
+          route: PSU.store.state.route,
+          selCount: PSU.store.state.selections.length,
+        });
+      },
+      onUnmounted() {
+        if (this._unsub) this._unsub();
+      },
+    };
+  </script>
+</app-root>

@@ -1,0 +1,415 @@
+<enhanced-charts>
+  <div class="psu-enhanced-charts">
+    <!-- Graphiques existants améliorés -->
+    <div class="psu-chart-grid">
+      <!-- Sexe avec détails au survol -->
+      <div class="psu-chart-card psu-chart-card--interactive">
+        <h3>Sexe</h3>
+        <div class="psu-hbar-row">
+          <div class="psu-hbar" onmouseover={ () => showTooltip('femme', 8, 45) } onmouseout={ hideTooltip }>
+            <span>F</span>
+            <div class="psu-hbar-fill" style={ "width:" + state.pctF + "%" }></div>
+            <span>{ state.pctF }%</span>
+          </div>
+          <div class="psu-hbar" onmouseover={ () => showTooltip('homme', 92, 518) } onmouseout={ hideTooltip }>
+            <span>H</span>
+            <div class="psu-hbar-fill psu-hbar-fill--alt" style={ "width:" + state.pctH + "%" }></div>
+            <span>{ state.pctH }%</span>
+          </div>
+        </div>
+        <div class="psu-chart-details">
+          <small>Total: { state.totalAdmis } admis</small>
+        </div>
+      </div>
+
+      <!-- Bac avec comparaison nationale -->
+      <div class="psu-chart-card psu-chart-card--interactive">
+        <h3>Bac (parmi les admis) <button class="psu-btn--small" onclick={ toggleComparison }>Comparer</button></h3>
+        <div class="psu-vbars">
+          <div each={ b in state.bacShares } key={ b.key } class="psu-vbar" onmouseover={ () => showTooltip(b.key, b.pct, b.count) } onmouseout={ hideTooltip }>
+            <div class="psu-vbar-fill" style={ "height:" + b.pct + "%" }></div>
+            <span>{ b.pct }%</span>
+            <label>{ b.label }</label>
+            <small if={ state.showComparison } class="psu-comparison">National: { b.nationalAvg }%</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mentions avec tendance -->
+      <div class="psu-chart-card psu-chart-card--interactive">
+        <h3>Mentions (admis) <button class="psu-btn--small" onclick={ toggleTrend }>Tendance</button></h3>
+        <div class="psu-vbars">
+          <div each={ m in state.mentions } key={ m.key } class="psu-vbar" onmouseover={ () => showTooltip(m.key, m.pct, m.count) } onmouseout={ hideTooltip }>
+            <div class={"psu-vbar-fill psu-vbar-fill--m-" + m.key} style={ "height:" + m.pct + "%" }></div>
+            <span>{ m.pct }%</span>
+            <label>{ m.label }</label>
+            <small if={ state.showTrend } class="psu-trend">vs { m.previousYear }: { m.trend }</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Géographie avec carte -->
+      <div class="psu-chart-card psu-chart-card--interactive">
+        <h3>Géographie</h3>
+        <div class="psu-hbar-row">
+          <div class="psu-hbar" onmouseover={ () => showTooltip('academie', state.pctAca, state.acaCount) } onmouseout={ hideTooltip }>
+            <span>Même acad.</span>
+            <div class="psu-hbar-fill" style={ "width:" + state.pctAca + "%" }></div>
+            <span>{ state.pctAca }%</span>
+          </div>
+          <div class="psu-hbar" onmouseover={ () => showTooltip('idf', state.pctIdf, state.idfCount) } onmouseout={ hideTooltip }>
+            <span>IdF / acad.</span>
+            <div class="psu-hbar-fill psu-hbar-fill--alt" style={ "width:" + state.pctIdf + "%" }></div>
+            <span>{ state.pctIdf }%</span>
+          </div>
+        </div>
+        <button class="psu-btn--small" onclick={ showMap }>Voir sur carte</button>
+      </div>
+    </div>
+
+    <!-- Nouvelle section : Indicateurs avancés -->
+    <section class="psu-panel">
+      <h2>Indicateurs avancés</h2>
+      <div class="psu-metrics-grid">
+        <div class="psu-metric-card">
+          <h4>Score d'attractivité</h4>
+          <div class="psu-metric-value">{ state.attractivenessScore }</div>
+          <div class="psu-metric-bar">
+            <div class="psu-metric-fill" style={ "width:" + state.attractivenessScore + "%" }></div>
+          </div>
+          <small>Basé sur le ratio vœux/capacité</small>
+        </div>
+
+        <div class="psu-metric-card">
+          <h4>Sélectivité relative</h4>
+          <div class="psu-metric-value">{ state.selectivityRank }<span>/100</span></div>
+          <div class="psu-metric-bar">
+            <div class="psu-metric-fill psu-metric-fill--selective" style={ "width:" + state.selectivityRank + "%" }></div>
+          </div>
+          <small>Comparé aux formations similaires</small>
+        </div>
+
+        <div class="psu-metric-card">
+          <h4>Taux de remplissage</h4>
+          <div class="psu-metric-value">{ state.fillingRate }%</div>
+          <div class="psu-metric-bar">
+            <div class="psu-metric-fill psu-metric-fill--filled" style={ "width:" + state.fillingRate + "%" }></div>
+          </div>
+          <small>{ state.filledPlaces }/{ state.capacity } places</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tooltip flottant -->
+    <div class="psu-tooltip" if={ state.tooltip.show } style={ state.tooltip.style }>
+      <strong>{ state.tooltip.title }</strong>
+      <div>{ state.tooltip.value }% ({ state.tooltip.count } étudiants)</div>
+    </div>
+
+    <!-- Modal pour la carte géographique -->
+    <div class="psu-modal" if={ state.showMapModal } onclick={ hideMap }>
+      <div class="psu-modal-content" onclick={ (e) => e.stopPropagation() }>
+        <h3>Origine géographique des admis</h3>
+        <div class="psu-map-container">
+          <div class="psu-geo-legend">
+            <div class="psu-geo-item">
+              <span class="psu-geo-color psu-geo-local"></span>
+              <span>Même académie ({ state.pctAca }%)</span>
+            </div>
+            <div class="psu-geo-item">
+              <span class="psu-geo-color psu-geo-regional"></span>
+              <span>Même région ({ state.pctRegion }%)</span>
+            </div>
+            <div class="psu-geo-item">
+              <span class="psu-geo-color psu-geo-national"></span>
+              <span>Autres régions ({ state.pctNational }%)</span>
+            </div>
+          </div>
+          <div class="psu-simple-map">
+            <!-- Carte simplifiée de la France -->
+            <div class="psu-map-region psu-map-region--local" title={ state.pctAca + "% de même académie" }></div>
+            <div class="psu-map-region psu-map-region--regional" title={ state.pctRegion + "% de même région" }></div>
+            <div class="psu-map-region psu-map-region--national" title={ state.pctNational + "% d'autres régions" }></div>
+          </div>
+        </div>
+        <button class="psu-btn" onclick={ hideMap }>Fermer</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    export default {
+      onBeforeMount(props) {
+        this.state = {
+          // données de base
+          pctF: 8,
+          pctH: 92,
+          bacShares: [
+            { key: "gen", label: "Gén.", pct: 46, count: 207, nationalAvg: 52 },
+            { key: "tec", label: "Tech.", pct: 40, count: 180, nationalAvg: 28 },
+            { key: "pro", label: "Pro.", pct: 0, count: 0, nationalAvg: 8 },
+            { key: "aut", label: "Aut.", pct: 13, count: 59, nationalAvg: 12 }
+          ],
+          mentions: [
+            { key: "sans", label: "P", pct: 45, count: 203, previousYear: 42, trend: "+3%" },
+            { key: "ab", label: "AB", pct: 42, count: 190, previousYear: 45, trend: "-3%" },
+            { key: "b", label: "B", pct: 13, count: 59, previousYear: 10, trend: "+3%" },
+            { key: "tb", label: "TB", pct: 0, count: 0, previousYear: 2, trend: "-2%" },
+            { key: "tbf", label: "TBF", pct: 0, count: 0, previousYear: 1, trend: "-1%" }
+          ],
+          pctAca: 63,
+          pctIdf: 37,
+          pctRegion: 90,
+          pctNational: 10,
+          
+          // nouvelles données calculées
+          totalAdmis: 450,
+          capacity: 500,
+          filledPlaces: 450,
+          attractivenessScore: 85,
+          selectivityRank: 67,
+          fillingRate: 90,
+          
+          // États UI
+          showComparison: false,
+          showTrend: false,
+          showMapModal: false,
+          tooltip: {
+            show: false,
+            title: '',
+            value: 0,
+            count: 0,
+            style: ''
+          }
+        };
+      },
+
+      showTooltip(key, value, count) {
+        const labels = {
+          'femme': 'Femmes',
+          'homme': 'Hommes',
+          'gen': 'Baccalauréat Général',
+          'tec': 'Baccalauréat Technologique',
+          'pro': 'Baccalauréat Professionnel',
+          'aut': 'Autres',
+          'sans': 'Passable',
+          'ab': 'Assez Bien',
+          'b': 'Bien',
+          'tb': 'Très Bien',
+          'tbf': 'Très Bien avec Félicitations',
+          'academie': 'Même académie',
+          'idf': 'Île-de-France / académie'
+        };
+
+        this.update({
+          tooltip: {
+            show: true,
+            title: labels[key] || key,
+            value: value,
+            count: count,
+            style: 'left: ' + (event.pageX + 10) + 'px; top: ' + (event.pageY - 30) + 'px;'
+          }
+        });
+      },
+
+      hideTooltip() {
+        this.update({
+          tooltip: { show: false, title: '', value: 0, count: 0, style: '' }
+        });
+      },
+
+      toggleComparison() {
+        this.update({ showComparison: !this.state.showComparison });
+      },
+
+      toggleTrend() {
+        this.update({ showTrend: !this.state.showTrend });
+      },
+
+      showMap() {
+        this.update({ showMapModal: true });
+      },
+
+      hideMap() {
+        this.update({ showMapModal: false });
+      }
+    };
+  </script>
+  <style>
+    .psu-enhanced-charts {
+      margin: 1rem 0;
+    }
+
+    .psu-chart-card--interactive {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .psu-chart-card--interactive:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+      transition: all 0.2s ease;
+    }
+
+    .psu-chart-details {
+      margin-top: 0.5rem;
+      text-align: center;
+      color: var(--psu-muted);
+    }
+
+    .psu-comparison, .psu-trend {
+      display: block;
+      color: var(--psu-blue);
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+
+    .psu-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .psu-metric-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .psu-metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--psu-blue);
+      margin: 0.5rem 0;
+    }
+
+    .psu-metric-value span {
+      font-size: 1rem;
+      color: var(--psu-muted);
+    }
+
+    .psu-metric-bar {
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 0.5rem 0;
+    }
+
+    .psu-metric-fill {
+      height: 100%;
+      background: var(--psu-blue);
+      transition: width 0.3s ease;
+    }
+
+    .psu-metric-fill--selective {
+      background: #ff9800;
+    }
+
+    .psu-metric-fill--filled {
+      background: #4caf50;
+    }
+
+    .psu-tooltip {
+      position: fixed;
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .psu-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .psu-modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .psu-map-container {
+      margin: 1rem 0;
+    }
+
+    .psu-geo-legend {
+      margin-bottom: 1rem;
+    }
+
+    .psu-geo-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+    }
+
+    .psu-geo-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+    }
+
+    .psu-geo-local { background: #4caf50; }
+    .psu-geo-regional { background: #ff9800; }
+    .psu-geo-national { background: #2196f3; }
+
+    .psu-simple-map {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 200px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .psu-map-region {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .psu-map-region:hover {
+      transform: scale(1.1);
+    }
+
+    .psu-map-region--local { background: #4caf50; }
+    .psu-map-region--regional { background: #ff9800; }
+    .psu-map-region--national { background: #2196f3; }
+
+    @media (max-width: 768px) {
+      .psu-metrics-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .psu-modal-content {
+        padding: 1rem;
+      }
+    }
+  </style>
+</enhanced-charts>

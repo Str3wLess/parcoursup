@@ -1,0 +1,158 @@
+<export-data>
+  <button class="psu-btn psu-btn--export" onclick={ exportData }>
+    📊 Exporter les données
+  </button>
+  
+  <div class="psu-export-modal" if={ state.showModal } onclick={ closeModal }>
+    <div class="psu-export-content" onclick={ (e) => e.stopPropagation() }>
+      <h3>Exporter les données</h3>
+      <p>Sélectionnez le format d'export :</p>
+      <div class="psu-export-options">
+        <label>
+          <input type="radio" name="format" value="csv" checked={ state.format === 'csv' } onchange={ updateFormat } />
+          CSV (Excel)
+        </label>
+        <label>
+          <input type="radio" name="format" value="json" checked={ state.format === 'json' } onchange={ updateFormat } />
+          JSON
+        </label>
+      </div>
+      <div class="psu-export-actions">
+        <button type="button" onclick={ performExport }>Télécharger</button>
+        <button type="button" onclick={ closeModal }>Annuler</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    export default {
+      onBeforeMount() {
+        this.state = {
+          showModal: false,
+          format: 'csv'
+        };
+      },
+      exportData() {
+        this.update({ showModal: true });
+      },
+      closeModal() {
+        this.update({ showModal: false });
+      },
+      updateFormat(e) {
+        this.update({ format: e.target.value });
+      },
+      performExport() {
+        const data = this.props.data || [];
+        if (!data.length) {
+          alert('Aucune donnée à exporter');
+          return;
+        }
+        
+        let content, filename, type;
+        
+        if (this.state.format === 'csv') {
+          content = this.convertToCSV(data);
+          filename = 'parcoursup_export.csv';
+          type = 'text/csv';
+        } else {
+          content = JSON.stringify(data, null, 2);
+          filename = 'parcoursup_export.json';
+          type = 'application/json';
+        }
+        
+        const blob = new Blob([content], { type });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        this.closeModal();
+      },
+      convertToCSV(data) {
+        if (!data.length) return '';
+        
+        const headers = Object.keys(data[0]);
+        const csvHeaders = headers.map(h => `"${h}"`).join(',');
+        
+        const csvRows = data.map(row => {
+          return headers.map(header => {
+            const value = row[header];
+            return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value;
+          }).join(',');
+        });
+        
+        return [csvHeaders, ...csvRows].join('\n');
+      }
+    };
+  </script>
+  
+  <style>
+    .psu-btn--export {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    
+    .psu-export-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .psu-export-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+    }
+    
+    .psu-export-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    
+    .psu-export-options label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+    
+    .psu-export-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+    
+    .psu-export-actions button {
+      padding: 0.4rem 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .psu-export-actions button:first-child {
+      background: var(--psu-blue);
+      color: white;
+      border-color: var(--psu-blue);
+    }
+  </style>
+</export-data>

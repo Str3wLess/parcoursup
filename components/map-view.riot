@@ -1,0 +1,53 @@
+﻿<map-view>
+  <div id="psu-leaflet-map" class="psu-map"></div>
+  <script>
+    export default {
+      onMounted(props) {
+        this._markersLayer = null;
+        this._map = null;
+        this.refresh(props);
+      },
+      onUpdated(props) {
+        this.refresh(props);
+      },
+      onUnmounted() {
+        if (this._map) {
+          this._map.remove();
+          this._map = null;
+        }
+      },
+      refresh(props) {
+        var el = this.$("#psu-leaflet-map");
+        if (!el || !window.L) return;
+        if (!this._map) {
+          this._map = L.map(el).setView([46.5, 2.5], 6);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: "&copy; OpenStreetMap",
+          }).addTo(this._map);
+          this._markersLayer = L.layerGroup().addTo(this._map);
+        }
+        this._markersLayer.clearLayers();
+        var marks = props.markers || [];
+        var bounds = [];
+        marks.forEach(
+          function (m) {
+            if (m.lat == null || m.lon == null) return;
+            var mk = L.marker([m.lat, m.lon]).addTo(this._markersLayer);
+            mk.bindPopup(
+              '<a data-nav href="' +
+                m.href +
+                '">' +
+                (m.label || "").replace(/</g, "&lt;") +
+                "</a>"
+            );
+            bounds.push([m.lat, m.lon]);
+          }.bind(this)
+        );
+        if (bounds.length === 1) this._map.setView(bounds[0], 10);
+        else if (bounds.length > 1) this._map.fitBounds(bounds, { padding: [24, 24] });
+      },
+    };
+  </script>
+</map-view>
+

@@ -1,0 +1,121 @@
+﻿<compare-page>
+  <section class="psu-panel">
+    <h1>Aide au choix — comparaison</h1>
+    <form class="psu-advisor" onsubmit={ saveProfile }>
+      <fieldset>
+        <legend>Votre profil</legend>
+        <label>Note (moyenne terminale, sur 20)</label>
+        <input type="text" name="note" value={ state.user.note } size="4" oninput={ updateProfile } />
+        <label>Série du bac</label>
+        <label><input type="radio" name="serie" value="gen" checked={ state.user.serie === "gen" } onclick={ (e) => setSerie('gen') } /> Général</label>
+        <label><input type="radio" name="serie" value="tec" checked={ state.user.serie === "tec" } onclick={ (e) => setSerie('tec') } /> Techno</label>
+        <label><input type="radio" name="serie" value="pro" checked={ state.user.serie === "pro" } onclick={ (e) => setSerie('pro') } /> Pro</label>
+        <button type="submit">Enregistrer le profil</button>
+      </fieldset>
+    </form>
+    <p class="psu-muted">Score indicatif (non officiel) : croise le taux d accès open data, la répartition d accès par type de bac, et votre note.</p>
+  </section>
+
+  <section class="psu-panel" if={ !state.items.length }>
+    <p>Aucune formation sélectionnée. Ajoutez-en depuis la recherche ou une fiche formation.</p>
+    <a data-nav href={ state.homeHref }>Retour recherche</a>
+  </section>
+
+  <section class="psu-panel" if={ state.items.length }>
+    <h2>Formations sélectionnées ({ state.items.length })</h2>
+    <div class="psu-compare-grid">
+      <article each={ it in state.items } key={ it.id } class={"psu-card psu-card--" + (it.strength || "med") }>
+        <header class="psu-card-head">
+          <button type="button" class="psu-icon-x" title="Retirer" onclick={ (e) => remove(it.id) }>×</button>
+          <a data-nav href={ it.detailHref }>{ it.titre }</a>
+        </header>
+        <ul class="psu-card-body">
+          <li><strong>Capacité</strong> : { it.capa }</li>
+          <li><strong>Taux d'accès</strong> : { it.taux }%</li>
+          <li><strong>Score indicatif</strong> : <span class="psu-score">{ it.scoreInfo.score }</span>/100</li>
+          <li class="psu-small">Répartition accès (votre voie) : ~{ it.scoreInfo.partBac }% des « bien classés »</li>
+          <li class="psu-small">Note seuil estimée : ~{ it.scoreInfo.noteSeuil }/20</li>
+          <li class="psu-small">Difficulté : { it.strength === "high" ? "Élevée" : it.strength === "med" ? "Moyenne" : "Faible" }</li>
+          <li class="psu-small">Taux utilisé pour calcul : { it.scoreInfo.taux }%</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+  <script>
+    export default {
+      onBeforeMount() {
+        this.state = { items: [], user: {}, homeHref: PSU.href("/") };
+      },
+      onMounted() {
+        this.refresh();
+        this._un = PSU.store.subscribe(this.refresh.bind(this));
+      },
+      onUnmounted() {
+        if (this._un) this._un();
+      },
+      refresh() {
+        console.log("refresh called - updating comparison");
+        var user = PSU.store.state.userProfile || { serie: "gen", note: "12" };
+        console.log("User profile:", user);
+        console.log("Store selections:", PSU.store.state.selections);
+        var items = (PSU.store.state.selections || []).map(function (s) {
+          console.log("Selection item:", s);
+          var sc = PSU.model.advisorScore(s, user);
+          console.log("Score calculation result:", sc);
+          var tauxAffiche = s.taux == null ? 0 : s.taux;
+          // seuils équilibrés : 35+ = vert, 22-34 = orange, <22 = rouge
+          var strength = sc.score >= 35 ? "high" : sc.score >= 22 ? "med" : "low";
+          return {
+            id: s.id,
+            titre: s.titre,
+            capa: s.capa,
+            taux: tauxAffiche, // taux réel de l'api
+            scoreInfo: sc,    // score avec taux corrigé pour le calcul
+            detailHref: PSU.href("/formation/" + encodeURIComponent(s.id)),
+            strength: strength,
+          };
+        });
+        console.log("Final items:", items);
+        this.update({ items: items, user: user });
+      },
+      remove(id) {
+        PSU.store.removeSelection(id);
+      },
+      setSerie(serie) {
+        console.log("setSerie called with:", serie);
+        var currentUser = PSU.store.state.userProfile || { serie: "gen", note: "12" };
+        var newProfile = {
+          note: currentUser.note,
+          serie: serie,
+        };
+        console.log("Setting new profile:", newProfile);
+        PSU.store.setUserProfile(newProfile);
+        // refresh sera appelé automatiquement via le subscribe
+      },
+      updateProfile(e) {
+        // Mettre à jour le profil dans le store immédiatement
+        var form = e.target.form || document.querySelector('.psu-advisor');
+        if (form) {
+          var newProfile = {
+            note: form.note.value,
+            serie: form.serie.value,
+          };
+          console.log("updateProfile called:", newProfile);
+          PSU.store.setUserProfile(newProfile);
+          // refresh sera appelé automatiquement via le subscribe
+        } else {
+          console.log("Form not found in updateProfile");
+        }
+      },
+      saveProfile(e) {
+        e.preventDefault();
+        var f = e.target;
+        PSU.store.setUserProfile({
+          note: f.note.value,
+          serie: f.serie.value,
+        });
+        this.refresh();
+      },
+    };
+  </script>
+</compare-page>

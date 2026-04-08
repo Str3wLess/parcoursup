@@ -1,0 +1,127 @@
+<filters-panel>
+  <section class="psu-panel psu-filters">
+    <h3>Filtres avancés</h3>
+    <form onsubmit={ applyFilters }>
+      <div class="psu-filter-group">
+        <label>
+          Capacacité minimale
+          <input type="number" name="capacite" min="1" max="500" value={ state.filters.capacite } />
+        </label>
+        <label>
+          Taux d'accès minimum
+          <input type="number" name="taux" min="0" max="100" value={ state.filters.taux } />
+        </label>
+      </div>
+      <div class="psu-filter-group">
+        <label>
+          Département
+          <select name="departement">
+            <option value="">Tous</option>
+            <option each={ dep in state.departements } value={ dep.code } selected={ state.filters.departement === dep.code }>
+              { dep.code } - { dep.nom }
+            </option>
+          </select>
+        </label>
+        <label>
+          Type d'établissement
+          <select name="type">
+            <option value="">Tous</option>
+            <option value="Public" selected={ state.filters.type === "Public" }>Public</option>
+            <option value="Privé" selected={ state.filters.type === "Privé" }>Privé</option>
+          </select>
+        </label>
+      </div>
+      <div class="psu-filter-actions">
+        <button type="submit">Appliquer</button>
+        <button type="button" onclick={ resetFilters }>Réinitialiser</button>
+      </div>
+    </form>
+  </section>
+  <script>
+    export default {
+      onBeforeMount() {
+        this.state = {
+          filters: {
+            capacite: '',
+            taux: '',
+            departement: '',
+            type: ''
+          },
+          departements: [
+            { code: '75', nom: 'Paris' },
+            { code: '77', nom: 'Seine-et-Marne' },
+            { code: '78', nom: 'Yvelines' },
+            { code: '91', nom: 'Essonne' },
+            { code: '92', nom: 'Hauts-de-Seine' },
+            { code: '93', nom: 'Seine-Saint-Denis' },
+            { code: '94', nom: 'Val-de-Marne' },
+            { code: '95', nom: 'Val-d\'Oise' }
+          ]
+        };
+      },
+      applyFilters(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const filters = {
+          capacite: formData.get('capacite'),
+          taux: formData.get('taux'),
+          departement: formData.get('departement'),
+          type: formData.get('type')
+        };
+        this.update({ filters });
+        this.props.onFiltersChange(filters);
+      },
+      resetFilters() {
+        const emptyFilters = {
+          capacite: '',
+          taux: '',
+          departement: '',
+          type: ''
+        };
+        this.update({ filters: emptyFilters });
+        this.props.onFiltersChange(emptyFilters);
+      }
+    };
+  </script>
+  <style>
+    .psu-filters {
+      margin-bottom: 1rem;
+    }
+    .psu-filter-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .psu-filter-group label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      font-size: 0.9rem;
+    }
+    .psu-filter-group input,
+    .psu-filter-group select {
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .psu-filter-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .psu-filter-actions button {
+      padding: 0.4rem 0.8rem;
+      border: 1px solid var(--psu-blue);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .psu-filter-actions button[type="submit"] {
+      background: var(--psu-blue);
+      color: white;
+    }
+    .psu-filter-actions button[type="button"] {
+      background: white;
+      color: var(--psu-blue);
+    }
+  </style>
+</filters-panel>

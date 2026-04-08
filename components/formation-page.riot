@@ -1,0 +1,333 @@
+﻿<formation-page>
+  <section class="psu-panel" if={ state.loading }>
+    <loading-spinner show={ true } text="Chargement de la formation..." />
+  </section>
+  <section class="psu-panel psu-error" if={ state.error }>{ state.error }</section>
+
+  <article if={ state.raw }>
+    <header class="psu-formation-head">
+      <p class="psu-kicker">Formation</p>
+      <h1>
+        <a if={ state.raw.lien_form_psup } href={ state.raw.lien_form_psup } target="_blank" rel="noopener">{ state.raw.lib_comp_voe_ins }</a>
+        <span if={ !state.raw.lien_form_psup }>{ state.raw.lib_comp_voe_ins }</span>
+      </h1>
+      <ul class="psu-meta">
+        <li><strong>Ville</strong> : { state.raw.ville_etab }</li>
+        <li><strong>Département</strong> : { state.raw.dep } { state.raw.dep_lib }</li>
+        <li><strong>Académie</strong> : { state.raw.acad_mies }</li>
+        <li><strong>Type</strong> : { state.raw.contrat_etab }</li>
+        <li><strong>Capacité</strong> : { state.raw.capa_fin }</li>
+        <li><strong>Code</strong> : { state.raw.cod_aff_form }</li>
+      </ul>
+      <p>
+        <button type="button" class="psu-btn" onclick={ toggleCompare }>
+          { state.isInCompare ? "Enlever de la comparaison" : "Ajouter à la comparaison" }
+        </button>
+        <a class="psu-btn psu-btn--link" data-nav href={ compareHref }>Voir la comparaison</a>
+      </p>
+    </header>
+
+    <section class="psu-grid2">
+      <div>
+        <h2>Phase principale d admission</h2>
+        <table class="psu-table">
+          <thead>
+            <tr><th>Bac</th><th>Vœux</th><th>Classés</th><th>Propositions</th><th>Acceptés</th></tr>
+          </thead>
+          <tbody>
+            <tr each={ r in state.rowsPP } key={ r.label }>
+              <td>{ r.label }</td><td>{ r.voeux }</td><td>{ r.classes }</td><td>{ r.prop }</td><td>{ r.acc }</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <aside class="psu-timeline" if={ state.timeline.length }>
+        <h3>Rythme des propositions (PP)</h3>
+        <ul>
+          <li each={ t in state.timeline } key={ t.label }>
+            <span class="psu-tl-dot"></span>
+            <strong>{ t.label }</strong> — { t.n } admis ({ t.pct }%)
+          </li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="psu-panel">
+      <h2>Phase complémentaire</h2>
+      <table class="psu-table">
+        <thead>
+          <tr><th>Bac</th><th>Vœux</th><th>Classés</th><th>Propositions</th><th>Acceptés</th></tr>
+        </thead>
+        <tbody>
+          <tr each={ r in state.rowsPC } key={ r.label }>
+            <td>{ r.label }</td><td>{ r.voeux }</td><td>{ r.classes }</td><td>{ r.prop != null ? r.prop : "—" }</td><td>{ r.acc != null ? r.acc : "—" }</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="psu-panel">
+      <h2>Profil des admis</h2>
+      <div class="psu-chart-grid">
+        <div class="psu-chart-card">
+          <h3>Sexe</h3>
+          <div class="psu-hbar-row">
+            <div class="psu-hbar" title={ "Femmes : " + state.pctF + "% (" + Math.round(state.totalAdmis * state.pctF / 100) + " étudiants)" }>
+              <span>F</span>
+              <div class="psu-hbar-fill" style={ "width:" + state.pctF + "%" }></div>
+              <span>{ state.pctF }%</span>
+            </div>
+            <div class="psu-hbar" title={ "Hommes : " + state.pctH + "% (" + Math.round(state.totalAdmis * state.pctH / 100) + " étudiants)" }>
+              <span>H</span>
+              <div class="psu-hbar-fill psu-hbar-fill--alt" style={ "width:" + state.pctH + "%" }></div>
+              <span>{ state.pctH }%</span>
+            </div>
+          </div>
+        </div>
+        <div class="psu-chart-card">
+          <h3>Bac (parmi les admis)</h3>
+          <div class="psu-vbars">
+            <div each={ b in state.bacShares } key={ b.key } class="psu-vbar" title={ b.label + " : " + b.pct + "% (" + (b.count || Math.round(state.totalAdmis * b.pct / 100)) + " étudiants)" }>
+              <div class="psu-vbar-fill" style={ "height:" + b.pct + "%" }></div>
+              <span>{ b.pct }%</span>
+              <label>{ b.label }</label>
+            </div>
+          </div>
+        </div>
+        <div class="psu-chart-card">
+          <h3>Mentions (admis)</h3>
+          <div class="psu-vbars">
+            <div each={ m in state.mentions } key={ m.key } class="psu-vbar" title={ m.label + " : " + m.pct + "% (" + Math.round(state.totalAdmis * m.pct / 100) + " étudiants)" }>
+              <div class={"psu-vbar-fill psu-vbar-fill--m-" + m.key } style={ "height:" + m.pct + "%" }></div>
+              <span>{ m.pct }%</span>
+              <label>{ m.label }</label>
+            </div>
+          </div>
+        </div>
+        <div class="psu-chart-card">
+          <h3>Géographie (indicateurs dossier)</h3>
+          <div class="psu-hbar-row">
+            <div class="psu-hbar" title={ "Même académie : " + state.pctAca + "% (" + Math.round(state.totalAdmis * state.pctAca / 100) + " étudiants)" }>
+              <span>Même acad.</span>
+              <div class="psu-hbar-fill" style={ "width:" + state.pctAca + "%" }></div>
+              <span>{ state.pctAca }%</span>
+            </div>
+            <div class="psu-hbar" title={ "Île-de-France / académie : " + state.pctIdf + "% (" + Math.round(state.totalAdmis * state.pctIdf / 100) + " étudiants)" }>
+              <span>IdF / acad.</span>
+              <div class="psu-hbar-fill psu-hbar-fill--alt" style={ "width:" + state.pctIdf + "%" }></div>
+              <span>{ state.pctIdf }%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="psu-panel">
+      <h2>Indicateurs clés</h2>
+      <div class="psu-metrics-grid">
+        <div class="psu-metric-card">
+          <h4>Taux d'accès</h4>
+          <div class="psu-metric-value">{ state.raw.taux_acces_ens || "N/A" }%</div>
+          <div class="psu-metric-bar">
+            <div class="psu-metric-fill" style={ "width:" + (state.raw.taux_acces_ens || 0) + "%" }></div>
+          </div>
+          <small>Session { state.raw.session }</small>
+        </div>
+
+        <div class="psu-metric-card">
+          <h4>Capacité / Admis</h4>
+          <div class="psu-metric-value">{ state.raw.capa_fin || "N/A" } / { state.totalAdmis }</div>
+          <div class="psu-metric-bar">
+            <div class="psu-metric-fill psu-metric-fill--capacity" style={ "width:" + Math.min(100, (state.totalAdmis / (state.raw.capa_fin || 1)) * 100) + "%" }></div>
+          </div>
+          <small>Taux de remplissage: { Math.round((state.totalAdmis / (state.raw.capa_fin || 1)) * 100) }%</small>
+        </div>
+
+        <div class="psu-metric-card">
+          <h4>Ratio vœux/capacité</h4>
+          <div class="psu-metric-value">{ Math.round((state.raw.voe_tot || 0) / (state.raw.capa_fin || 1) * 10) / 10 }</div>
+          <div class="psu-metric-bar">
+            <div class="psu-metric-fill psu-metric-fill--ratio" style={ "width:" + Math.min(100, ((state.raw.voe_tot || 0) / (state.raw.capa_fin || 1)) * 10) + "%" }></div>
+          </div>
+          <small>Compétitivité</small>
+        </div>
+
+        <div class="psu-metric-card">
+          <h4>Popularité</h4>
+          <div class="psu-metric-value">{ state.raw.voe_tot || "N/A" }</div>
+          <div class="psu-metric-bar">
+            <div class="psu-metric-fill psu-metric-fill--popularity" style={ "width:" + Math.min(100, (state.raw.voe_tot || 0) / 10) + "%" }></div>
+          </div>
+          <small>Total des vœux</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="psu-panel">
+      <h2>Sélectivité et mentions au bac (historique)</h2>
+      <p class="psu-muted">Années disponibles selon le code formation dans chaque millésime open data.</p>
+      <div class="psu-chart-card">
+        <h3>Sélectivité (taux d accès — indicateur jeu { state.raw.session })</h3>
+        <div class="psu-vbars psu-vbars--wide">
+          <div each={ p in state.evoTaux } key={ p.year } class="psu-vbar">
+            <div class="psu-vbar-fill" style={ "height:" + p.pct + "%" }></div>
+            <span>{ p.val }%</span>
+            <label>{ p.year }</label>
+          </div>
+        </div>
+      </div>
+      <div class="psu-chart-card">
+        <h3>Mentions (empilement %)</h3>
+        <div class="psu-legend">
+          <span><i class="sw sw-p"></i> P</span>
+          <span><i class="sw sw-ab"></i> AB</span>
+          <span><i class="sw sw-b"></i> B</span>
+          <span><i class="sw sw-tb"></i> TB</span>
+          <span><i class="sw sw-tbf"></i> TBF</span>
+        </div>
+        <div class="psu-stack-bars">
+          <div each={ col in state.evoMentions } key={ col.year } class="psu-stack-col">
+            <div class="psu-stack">
+              <div class="seg seg-p" style={ "height:" + col.p + "%" }><span if={ col.p >= 8 }>{ col.p }%</span></div>
+              <div class="seg seg-ab" style={ "height:" + col.ab + "%" }><span if={ col.ab >= 8 }>{ col.ab }%</span></div>
+              <div class="seg seg-b" style={ "height:" + col.b + "%" }><span if={ col.b >= 8 }>{ col.b }%</span></div>
+              <div class="seg seg-tb" style={ "height:" + col.tb + "%" }><span if={ col.tb >= 8 }>{ col.tb }%</span></div>
+              <div class="seg seg-tbf" style={ "height:" + col.tbf + "%" }><span if={ col.tbf >= 8 }>{ col.tbf }%</span></div>
+            </div>
+            <label>{ col.year }</label>
+          </div>
+        </div>
+      </div>
+    </section>
+  </article>
+  <script>
+    export default {
+      onBeforeMount(props) {
+        this.state = {
+          loading: true,
+          error: null,
+          raw: null,
+          rowsPP: [],
+          rowsPC: [],
+          timeline: [],
+          pctF: 0,
+          pctH: 0,
+          pctAca: 0,
+          pctIdf: 0,
+          bacShares: [],
+          mentions: [],
+          evoTaux: [],
+          evoMentions: [],
+          totalAdmis: 0,
+          isInCompare: false,
+        };
+        this.props = props;
+        this.compareHref = PSU.href("/compare");
+      },
+      async onMounted(props) {
+        this._loadedId = null;
+        var id = props.formationId || props["formation-id"];
+        this._loadedId = id;
+        
+        // Écouter les changements de sélections
+        this._unsubscribe = PSU.store.subscribe(function() {
+          this.updateCompareStatus();
+        }.bind(this));
+        
+        await this.load(id);
+        // Mettre à jour le statut de comparaison après le chargement
+        this.updateCompareStatus();
+      },
+      async onUpdated(props) {
+        var id = props.formationId || props["formation-id"];
+        if (id && id !== this._loadedId) {
+          this._loadedId = id;
+          await this.load(id);
+          // Mettre à jour le statut de comparaison après le chargement
+          this.updateCompareStatus();
+        }
+      },
+      toggleCompare() {
+        if (!this.state.raw) return;
+        var summary = PSU.model.summaryFromRecord(this.state.raw);
+        PSU.store.toggleSelection(summary);
+        this.updateCompareStatus();
+      },
+      updateCompareStatus() {
+        if (!this.state.raw) return;
+        var summary = PSU.model.summaryFromRecord(this.state.raw);
+        var selections = PSU.store.state.selections || [];
+        var isInCompare = selections.some(function(s) { return s.id === summary.id; });
+        
+        console.log("updateCompareStatus:", {
+          formationId: summary.id,
+          formationTitle: summary.titre,
+          selectionsCount: selections.length,
+          selections: selections.map(function(s) { return s.id; }),
+          isInCompare: isInCompare
+        });
+        
+        this.update({ isInCompare: isInCompare });
+      },
+      async load(fid) {
+        if (!fid) {
+          this.update({ loading: false, error: "Formation inconnue." });
+          return;
+        }
+        this.update({ loading: true, error: null });
+        try {
+          var raw = await PSU.api.getFormationByCode(fid);
+          if (!raw) {
+            this.update({ loading: false, error: "Formation introuvable pour le millésime courant." });
+            return;
+          }
+          var hist = await PSU.api.getFormationHistorySlices(fid);
+          var evoTaux = hist.map(function (h) {
+            var v = h.raw.taux_acces_ens;
+            return { year: h.year, val: v == null ? null : v, pct: v == null ? 0 : Math.min(100, v) };
+          });
+          var evoMentions = hist.map(function (h) {
+            var r = h.raw;
+            function n(x) { return x == null ? 0 : Number(x); }
+            return {
+              year: h.year,
+              p: n(r.pct_sansmention),
+              ab: n(r.pct_ab),
+              b: n(r.pct_b),
+              tb: n(r.pct_tb),
+              tbf: n(r.pct_tbf),
+            };
+          });
+          var pf = Number(raw.pct_f); if (isNaN(pf)) pf = 50;
+          var totalAdmis = Number(raw.acc_tot) || 450;
+          this.update({
+            raw: raw,
+            rowsPP: PSU.model.admissionRows(raw, "pp"),
+            rowsPC: PSU.model.admissionRows(raw, "pc"),
+            timeline: PSU.model.fillingTimeline(raw),
+            pctF: Math.round(pf * 10) / 10,
+            pctH: Math.round((100 - pf) * 10) / 10,
+            pctAca: raw.pct_aca_orig == null ? 0 : Number(raw.pct_aca_orig),
+            pctIdf: raw.pct_aca_orig_idf == null ? 0 : Number(raw.pct_aca_orig_idf),
+            bacShares: PSU.model.profileBacShares(raw),
+            mentions: PSU.model.profileMentions(raw),
+            evoTaux: evoTaux,
+            evoMentions: evoMentions,
+            totalAdmis: totalAdmis,
+            loading: false,
+          });
+          // Mettre à jour le statut de comparaison après le chargement
+          this.updateCompareStatus();
+        } catch (e) {
+          this.update({ loading: false, error: String(e.message || e) });
+        }
+      },
+      onUnmounted() {
+        if (this._unsubscribe) {
+          this._unsubscribe();
+        }
+      },
+    };
+  </script>
+</formation-page>
+

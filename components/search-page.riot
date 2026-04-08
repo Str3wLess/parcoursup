@@ -1,0 +1,192 @@
+﻿<search-page>
+  <filters-panel onFiltersChange={ handleFiltersChange } />
+  
+  <section class="psu-panel">
+    <form class="psu-search-form" onsubmit={ submit }>
+      <label>
+        Mots-clés
+        <input type="search" name="q" placeholder="ex. BUT informatique" value={ state.q } disabled={ state.loading } />
+      </label>
+      <label>
+        Tri
+        <select name="sort" value={ state.sort } disabled={ state.loading }>
+          <option value="taux">Taux d accès</option>
+          <option value="voeux">Vœux (total)</option>
+          <option value="capa">Capacité</option>
+        </select>
+      </label>
+      <button type="submit" disabled={ state.loading }>
+        { state.loading ? "Recherche..." : "Rechercher" }
+      </button>
+    </form>
+    <p class="psu-muted" if={ state.total != null && !state.loading }>
+      { state.q || "(tout)" } : { state.total } résultat(s)
+      { state.hasActiveFilters ? " (filtres actifs)" : "" }
+    </p>
+    <div class="psu-error" if={ state.error }>
+      <strong>Erreur :</strong> { state.error }
+      <button type="button" onclick={ clearError } class="psu-btn psu-btn--small">✕</button>
+    </div>
+  </section>
+
+  <section class="psu-panel psu-map-wrap" if={ state.rows && state.rows.length }>
+    <map-view markers={ state.markers } />
+  </section>
+
+  <section class="psu-panel" if={ state.loading }>
+    <loading-spinner show={ true } text="Recherche en cours..." />
+  </section>
+
+  <section class="psu-panel" if={ state.rows && state.rows.length && !state.loading }>
+    <div class="psu-table-tools">
+      <div class="psu-table-info">
+        <button type="button" disabled={ state.page <= 0 } onclick={ prevPage }>Précédent</button>
+        <span>Page { state.page + 1 }</span>
+        <button type="button" disabled={ state.offset + state.rows.length >= state.total } onclick={ nextPage }>Suivant</button>
+      </div>
+      <export-data data={ state.rows } />
+    </div>
+    <div class="psu-table-scroll">
+      <table class="psu-table">
+        <thead>
+          <tr>
+            <th>Sel.</th>
+            <th>Nom</th>
+            <th>Filière</th>
+            <th>Ville</th>
+            <th>Dpt</th>
+            <th>Taux</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr each={ row in state.rows } key={ row.id }>
+            <td>
+              <input type="checkbox" checked={ isSel(row.id) } onchange={ (e) => toggleRow(e, row) } />
+            </td>
+            <td>
+              <a data-nav href={ row.detailHref }>{ row.titre }</a>
+            </td>
+            <td>{ row.filiere }</td>
+            <td>{ row.ville }</td>
+            <td>{ row.dep }</td>
+            <td>
+              <div class="psu-bar-wrap">
+                <div class="psu-bar psu-bar--access" style={ "width:" + (row.taux || 0) + "%" }></div>
+              </div>
+              <span class="psu-small">{ row.taux }%</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <script>
+    export default {
+      onBeforeMount() {
+        this.state = {
+          q: PSU.store.state.searchQuery || "",
+          sort: PSU.store.state.searchSort || "taux",
+          page: PSU.store.state.searchPage || 0,
+          rows: null,
+          markers: [],
+          total: null,
+          loading: false,
+          error: null,
+          offset: 0,
+          filters: {
+            capacite: '',
+            taux: '',
+            departement: '',
+            type: ''
+          },
+          hasActiveFilters: false
+        };
+      },
+      onMounted() {
+        this.runSearch();
+        this._unsub = PSU.store.subscribe(() => {
+          this.update({});
+        });
+      },
+      onUnmounted() {
+        if (this._unsub) this._unsub();
+      },
+      handleFiltersChange(filters) {
+        this.state.filters = filters;
+        this.state.hasActiveFilters = Object.values(filters).some(v => v !== '');
+        this.state.page = 0;
+        this.runSearch();
+      },
+      isSel(id) {
+        return PSU.store.isSelected(id);
+      },
+      toggleRow(e, row) {
+        PSU.store.toggleSelection(row);
+      },
+      clearError() {
+        this.update({ error: null });
+      },
+      submit(e) {
+        e.preventDefault();
+        var form = e.target;
+        this.state.q = form.q.value.trim();
+        this.state.sort = form.sort.value;
+        this.state.page = 0;
+        PSU.store.state.searchQuery = this.state.q;
+        PSU.store.state.searchSort = this.state.sort;
+        PSU.store.state.searchPage = 0;
+        this.runSearch();
+      },
+      async runSearch() {
+        this.update({ loading: true, error: null });
+        try {
+          var limit = PSU.config.DEFAULT_PAGE_SIZE;
+          var offset = this.state.page * limit;
+          var data = await PSU.api.searchFormations(this.state.q, {
+            sort: this.state.sort,
+            limit: limit,
+            offset: offset,
+            filters: this.state.filters
+          });
+          var rows = (data.results || []).map(function (r) {
+            var s = PSU.model.summaryFromRecord(r);
+            s.detailHref = PSU.href("/formation/" + encodeURIComponent(s.id));
+            return s;
+          });
+          var markers = rows
+            .filter(function (r) { return r.lat != null && r.lon != null; })
+            .map(function (r) {
+              return {
+                id: r.id,
+                lat: r.lat,
+                lon: r.lon,
+                label: r.titre,
+                href: PSU.href("/formation/" + encodeURIComponent(r.id)),
+              };
+            });
+          this.update({
+            rows: rows,
+            markers: markers,
+            total: data.total_count,
+            offset: offset,
+            loading: false,
+          });
+        } catch (err) {
+          this.update({ error: String(err.message || err), loading: false });
+        }
+      },
+      prevPage() {
+        if (this.state.page <= 0) return;
+        this.state.page--;
+        PSU.store.state.searchPage = this.state.page;
+        this.runSearch();
+      },
+      nextPage() {
+        if (this.state.offset + this.state.rows.length >= this.state.total) return;
+        this.state.page++;
+        PSU.store.state.searchPage = this.state.page;
+        this.runSearch();
+      },
+    };
+  </script>
+</search-page>
