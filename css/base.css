@@ -1,0 +1,111 @@
+/* Base styles - Variables et styles généraux */
+
+:root {
+  --psu-blue: #1565c0;
+  --psu-red: #b71c1c;
+  --psu-green: #2e7d32;
+  --psu-muted: #666;
+  --psu-bg: #f5f5f5;
+  --psu-card-bg: #fafafa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  line-height: 1.5;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  background: var(--psu-bg);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.1rem; }
+
+p {
+  margin: 0 0 1rem;
+}
+
+a {
+  color: var(--psu-blue);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.psu-muted {
+  color: var(--psu-muted);
+  font-size: 0.9rem;
+}
+
+.psu-small {
+  font-size: 0.8rem;
+  color: var(--psu-muted);
+}
+
+.psu-center {
+  text-align: center;
+}
+
+.psu-right {
+  text-align: right;
+}
+
+.psu-left {
+  text-align: left;
+}
+
+.psu-hidden {
+  display: none;
+}
+
+.psu-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

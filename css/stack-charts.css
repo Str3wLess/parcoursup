@@ -1,0 +1,91 @@
+/* Stack charts - Graphiques en pile pour les mentions */
+
+.psu-stack-bars {
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 0.6rem !important;
+  min-height: 220px !important;
+  padding-top: 1rem !important;
+}
+
+.psu-stack-col {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  font-size: 0.7rem !important;
+}
+
+.psu-stack {
+  width: 100% !important;
+  height: 200px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  overflow: hidden !important;
+  background: #fff !important;
+}
+
+.psu-stack .seg {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.65rem !important;
+  color: #111 !important;
+  min-height: 2px !important;
+  transition: all 0.2s ease !important;
+}
+
+.seg-p { 
+  background: #c62828 !important; 
+  color: #fff !important;
+}
+
+.seg-ab { 
+  background: #ef6c00 !important; 
+  color: #fff !important;
+}
+
+.seg-b { 
+  background: #fbc02d !important;
+}
+
+.seg-tb { 
+  background: #2e7d32 !important; 
+  color: #fff !important;
+}
+
+.seg-tbf { 
+  background: #1565c0 !important; 
+  color: #fff !important;
+}
+
+.psu-stack .seg:hover {
+  opacity: 0.8 !important;
+  transform: scale(1.02) !important;
+}
+
+/* Légendes des mentions */
+.psu-legend { 
+  display: flex !important; 
+  flex-wrap: wrap !important; 
+  gap: 0.75rem !important; 
+  font-size: 0.8rem !important; 
+  margin-bottom: 0.5rem !important; 
+}
+
+.psu-legend .sw {
+  display: inline-block !important;
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  margin-right: 4px !important;
+}
+
+.sw-p { background: #c62828 !important; }
+.sw-ab { background: #ef6c00 !important; }
+.sw-b { background: #fbc02d !important; }
+.sw-tb { background: #2e7d32 !important; }
+.sw-tbf { background: #1565c0 !important; }

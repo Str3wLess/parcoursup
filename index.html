@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Open Data Parcoursup</title>
+  <!-- Pour déploiement : <base href="/~khadir/parcoursup/" /> -->
+  <base href="/" />
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/charts.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/stack-charts.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://cdn.jsdelivr.net/npm/riot@9.4.4/riot+compiler.min.js"></script>
+  <script type="riot" src="components/loading-spinner.riot"></script>
+  <script type="riot" src="components/filters-panel.riot"></script>
+  <script type="riot" src="components/export-data.riot"></script>
+  <script type="riot" src="components/enhanced-charts.riot"></script>
+  <script type="riot" src="components/comparison-tool.riot"></script>
+  <script type="riot" src="components/map-view.riot"></script>
+  <script type="riot" src="components/search-page.riot"></script>
+  <script type="riot" src="components/formation-page.riot"></script>
+  <script type="riot" src="components/compare-page.riot"></script>
+  <script type="riot" src="components/app-root.riot"></script>
+</head>
+<body>
+  <app-root></app-root>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="js/config.js"></script>
+  <script src="js/services/apiClient.js"></script>
+  <script src="js/services/storage.js"></script>
+  <script src="js/models/parcoursupModel.js"></script>
+  <script src="js/state/store.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

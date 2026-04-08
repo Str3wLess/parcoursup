@@ -1,0 +1,355 @@
+/* Charts styles - Graphiques et visualisations */
+
+/* Grille de graphiques */
+.psu-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 800px) {
+  .psu-chart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Cartes de graphiques */
+.psu-chart-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0.75rem;
+  background: #fafafa;
+  transition: all 0.2s ease;
+}
+
+.psu-chart-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+  background: #fff;
+}
+
+.psu-chart-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+/* Barres horizontales */
+.psu-hbar-row .psu-hbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.35rem 0;
+  font-size: 0.85rem;
+  transition: transform 0.2s ease;
+}
+
+.psu-hbar-row .psu-hbar:hover {
+  transform: scale(1.02);
+}
+
+.psu-hbar-fill {
+  flex: 1;
+  height: 14px;
+  background: #26a69a;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.psu-hbar-row .psu-hbar:hover .psu-hbar-fill {
+  opacity: 0.8;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.psu-hbar-fill--alt {
+  background: #00897b;
+}
+
+/* Barres verticales */
+.psu-vbars {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  height: 160px;
+  padding-top: 0.5rem;
+}
+
+.psu-vbars--wide {
+  height: 200px;
+}
+
+.psu-vbars .psu-vbar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  font-size: 0.75rem;
+  transition: transform 0.2s ease;
+}
+
+.psu-vbars .psu-vbar:hover {
+  transform: scale(1.05);
+}
+
+.psu-vbars .psu-vbar-fill {
+  width: 100%;
+  min-height: 4px;
+  background: #26a69a;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.2s ease;
+}
+
+.psu-vbars .psu-vbar:hover .psu-vbar-fill {
+  opacity: 0.8;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Mentions spécifiques */
+.psu-vbar-fill--m-sans { background: #c62828; }
+.psu-vbar-fill--m-ab { background: #ef6c00; }
+.psu-vbar-fill--m-b { background: #fbc02d; }
+.psu-vbar-fill--m-tb { background: #2e7d32; }
+.psu-vbar-fill--m-tbf { background: #1565c0; }
+
+/* Légendes des mentions */
+.psu-legend { 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 0.75rem; 
+  font-size: 0.8rem; 
+  margin-bottom: 0.5rem; 
+}
+
+.psu-legend .sw {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.sw-p { background: #c62828; }
+.sw-ab { background: #ef6c00; }
+.sw-b { background: #fbc02d; }
+.sw-tb { background: #2e7d32; }
+.sw-tbf { background: #1565c0; }
+
+/* Graphiques en pile (stack bars) */
+.psu-stack-bars {
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 0.6rem !important;
+  min-height: 220px !important;
+  padding-top: 1rem !important;
+}
+
+.psu-stack-col {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  font-size: 0.7rem !important;
+}
+
+.psu-stack {
+  width: 100% !important;
+  height: 200px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  overflow: hidden !important;
+  background: #fff !important;
+}
+
+.psu-stack .seg {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.65rem !important;
+  color: #111 !important;
+  min-height: 2px !important;
+  transition: all 0.2s ease !important;
+}
+
+.seg-p { 
+  background: #c62828 !important; 
+  color: #fff !important;
+}
+
+.seg-ab { 
+  background: #ef6c00 !important; 
+  color: #fff !important;
+}
+
+.seg-b { 
+  background: #fbc02d !important;
+}
+
+.seg-tb { 
+  background: #2e7d32 !important; 
+  color: #fff !important;
+}
+
+.seg-tbf { 
+  background: #1565c0 !important; 
+  color: #fff !important;
+}
+
+.psu-stack .seg:hover {
+  opacity: 0.8;
+  transform: scale(1.02);
+}
+
+/* Indicateurs métriques */
+.psu-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.psu-metric-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.psu-metric-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.psu-metric-card h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  color: var(--psu-muted);
+  font-weight: 600;
+}
+
+.psu-metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--psu-blue);
+  margin: 0.5rem 0;
+}
+
+.psu-metric-bar {
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+}
+
+.psu-metric-fill {
+  height: 100%;
+  background: var(--psu-blue);
+  transition: width 0.3s ease;
+}
+
+.psu-metric-fill--capacity {
+  background: #4caf50;
+}
+
+.psu-metric-fill--ratio {
+  background: #ff9800;
+}
+
+.psu-metric-fill--popularity {
+  background: #9c27b0;
+}
+
+.psu-metric-card small {
+  display: block;
+  color: var(--psu-muted);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .psu-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Scores */
+.psu-score {
+  font-weight: 700;
+}
+
+/* Styles pour l'aide à l'orientation */
+.psu-advisor fieldset {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.psu-advisor label {
+  margin-right: 1rem;
+}
+
+/* Grille de comparaison */
+.psu-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .psu-compare-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Outils de tableau */
+.psu-table-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.psu-table-info {
+  color: var(--psu-muted);
+  font-size: 0.9rem;
+}
+
+.psu-table-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Responsive pour les graphiques */
+@media (max-width: 600px) {
+  .psu-vbars {
+    height: 120px;
+    gap: 0.5rem;
+  }
+  
+  .psu-vbars--wide {
+    height: 150px;
+  }
+  
+  .psu-chart-card {
+    padding: 0.5rem;
+  }
+  
+  .psu-metric-card {
+    padding: 0.75rem;
+  }
+  
+  .psu-metric-value {
+    font-size: 1.5rem;
+  }
+}
